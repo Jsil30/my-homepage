@@ -1,0 +1,54 @@
+:root{
+  --bg1:#6a00f4; /* purple */
+  --bg2:#ff7a18; /* orange */
+  --bg3:#0077ff; /* blue */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;
+  min-height:100vh;
+  background: linear-gradient(135deg,var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: #fff;
+}
+
+.hero{width:100%;padding:4rem 1rem;display:flex;align-items:center;justify-content:center}
+.card{
+  background: rgba(255,255,255,0.06);
+  padding:2.25rem 2rem;
+  border-radius:18px;
+  text-align:center;
+  max-width:420px;
+  width:100%;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(6px);
+}
+
+.profile-image{
+  width:160px;height:160px;
+  border-radius:50%;
+  object-fit:cover;
+  display:block;margin:0 auto 1rem auto;
+  border:5px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h1{font-size:1.8rem;margin-bottom:0.25rem}
+.lead{opacity:0.95;margin-bottom:1.25rem;color:rgba(255,255,255,0.92)}
+
+.contact-btn{
+  appearance:none;border:0;padding:0.65rem 1.05rem;border-radius:999px;font-weight:600;
+  color:#1b1b1b;background:linear-gradient(90deg,rgba(255,255,255,0.95),rgba(255,255,255,0.85));
+  cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;
+}
+.contact-btn:active{transform:translateY(1px)}
+.contact-btn:focus{outline:3px solid rgba(255,255,255,0.14)}
+
+@media (max-width:420px){
+  .profile-image{width:120px;height:120px}
+  .card{padding:1.5rem}
+}
