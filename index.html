@@ -1,37 +1,9 @@
-</body>
-<script>
-  // Dog CEO API widget logic
-  let breedList = [];
-
-  async function getBreeds() {
-    const res = await fetch('https://dog.ceo/api/breeds/list/all');
-    const data = await res.json();
-    breedList = Object.keys(data.message);
-  }
-
-  async function showRandomBreed() {
-    if (breedList.length === 0) await getBreeds();
-    const breed = breedList[Math.floor(Math.random() * breedList.length)];
-    document.getElementById('breed-name').innerText = breed.charAt(0).toUpperCase() + breed.slice(1);
-    // get image
-    const imgRes = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`);
-    const imgData = await imgRes.json();
-    const img = document.getElementById('dog-img');
-    img.src = imgData.message;
-    img.style.display = '';
-  }
-
-  document.getElementById('refresh-btn').onclick = showRandomBreed;
-
-  // Initial load
-  showRandomBreed();
-</script>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hello — My Homepage</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chunky's World</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -39,12 +11,6 @@
     <div class="card card-centered">
       <img class="profile-image" src="images/picturechunkyandme.png" alt="Your photo" onerror="this.onerror=null;this.src='images/placeholder.svg'">
       <h1>You're in Chunky's world</h1>
-  <!-- Contact button removed -->
-    </div>
-    <div id="dog-widget">
-      <div id="breed-name">Loading...</div>
-      <img id="dog-img" src="" alt="Dog image" style="display:none;">
-      <button id="refresh-btn">Show Another Breed</button>
     </div>
     <div class="sections-below">
       <div class="split-section">
@@ -64,39 +30,123 @@
         </div>
         <div class="split-right">
           <div class="treat-section">
-            <button class="treat-btn" type="button" id="give-treat-btn">Give me a treat</button>
-            <div class="jar-container">
-              <img class="treat-img" src="images/jar.svg" alt="Treat Jar">
-              <div id="treats-inside"></div>
+            <button class="treat-btn" type="button" id="treat-btn">Give me a treat</button>
+            <div class="treat-jar-container" style="position:relative;display:inline-block;width:120px;height:220px;">
+              <div id="treats-stack" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;pointer-events:none;"></div>
+              <img class="treat-img" src="images/jar.svg" alt="Treat Jar" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;">
             </div>
           </div>
         </div>
       </div>
+      <div class="dog-widget-row">
+        <button class="treat-btn" id="refresh-btn">Show Another Breed</button>
+        <div id="dog-widget">
+          <div id="breed-name">Loading...</div>
+          <img id="dog-img" src="" alt="Dog image" style="display:none;">
+        </div>
+      </div>
     </div>
   </main>
-</body>
-<script>
-  const btn = document.getElementById('give-treat-btn');
-  const treatsInside = document.getElementById('treats-inside');
-  let treatCount = 0;
-  btn.addEventListener('click', () => {
+  <script>
+const treatBtn = document.getElementById('treat-btn');
+const treatsStack = document.getElementById('treats-stack');
+let treatCount = 0;
+
+if (treatBtn && treatsStack) {
+  // Jar dimensions
+  const jarHeight = 220; // px
+  const jarWidth = 120; // px
+  const treatHeight = 26; // px (smaller for better fit)
+  const treatWidth = 30; // px (smaller for better fit)
+  const visibleTreatWidth = 32; // px (more separation between treats)
+  const bottomPadding = 8; // px
+  const topPadding = 8; // px
+  const HORIZONTAL_MARGIN = 10; // px margin on each side
+  const usableHeight = jarHeight - bottomPadding - topPadding;
+  const usableWidth = jarWidth - (2 * HORIZONTAL_MARGIN); // 10px margin each side
+  const treatsPerRow = Math.floor(usableWidth / visibleTreatWidth);
+  const numRows = Math.floor(usableHeight / treatHeight);
+  const maxTreatsInJar = treatsPerRow * numRows;
+  // Define horizontal padding constants for jar silhouette
+  const BASE_HORIZONTAL_PADDING = 2;
+  const NECK_HORIZONTAL_PADDING = 12;
+
+  // Define per-row x-ranges to approximate jar silhouette
+  const rowXRanges = [];
+  // Maximum treat rotation in degrees
+  const MAX_ROTATION_DEGREES = 30;
+  for (let r = 0; r < numRows; r++) {
+    // Wider at bottom, narrower at top (neck)
+    // You can fine-tune these values for your jar.svg
+    const baseMin = BASE_HORIZONTAL_PADDING, baseMax = jarWidth - BASE_HORIZONTAL_PADDING - visibleTreatWidth;
+    const neckMin = NECK_HORIZONTAL_PADDING, neckMax = jarWidth - NECK_HORIZONTAL_PADDING - visibleTreatWidth;
+    // Interpolate between base and neck
+    const t = r / (numRows - 1);
+    const minX = Math.round(baseMin * (1 - t) + neckMin * t);
+    const maxX = Math.round(baseMax * (1 - t) + neckMax * t);
+    rowXRanges.push({ minX, maxX });
+  }
+
+  treatBtn.addEventListener('click', () => {
+    if (treatCount >= maxTreatsInJar) return;
+    // Determine row and column
+    const row = Math.floor(treatCount / treatsPerRow);
+    const col = treatCount % treatsPerRow;
+    // Calculate position: fixed horizontal positions in the row
+    const { minX, maxX } = rowXRanges[row];
+    const colCount = Math.floor((maxX - minX) / visibleTreatWidth) + 1;
+    const colIdx = Math.min(colCount - 1, col);
+    const x = minX + colIdx * visibleTreatWidth;
+    const y = jarHeight - bottomPadding - treatHeight * (row + 1);
+    // Add small random offset for natural look
+    const RANDOM_OFFSET_RANGE = 4;
+    const RANDOM_OFFSET_CENTER = 2;
+    const xOffset = Math.floor(Math.random() * RANDOM_OFFSET_RANGE - RANDOM_OFFSET_CENTER);
+    const yOffset = Math.floor(Math.random() * 4 - 2);
+    // Random rotation
+    const rot = Math.floor(Math.random() * (2 * MAX_ROTATION_DEGREES + 1) - MAX_ROTATION_DEGREES);
+  const treatImg = document.createElement('img');
+  treatImg.src = 'images/dog-treat.png';
+    treatImg.alt = 'Dog Treat';
+    treatImg.style.position = 'absolute';
+    treatImg.style.left = (x + xOffset) + 'px';
+    treatImg.style.top = (y + yOffset) + 'px';
+    treatImg.style.transform = `rotate(${rot}deg)`;
+    treatImg.style.width = treatWidth + 'px';
+    treatImg.style.height = treatHeight + 'px';
+    treatImg.style.zIndex = row;
+    treatImg.style.pointerEvents = 'none';
+    treatsStack.appendChild(treatImg);
     treatCount++;
-    const treat = document.createElement('img');
-    treat.src = 'images/dog-treat.png';
-    treat.alt = 'Dog Treat';
-    treat.className = 'dog-treat';
-    // Random rotation between -30 and 30 degrees
-    const rot = Math.random() * 60 - 30;
-    // Each treat is stacked a bit higher
-    const baseY = 60; // px from bottom
-    const stepY = 22; // px per treat
-    const y = baseY - (treatCount - 1) * stepY;
-    treat.style.transform = `translate(-50%, ${y}px) rotate(${rot}deg)`;
-    treat.style.position = 'absolute';
-    treat.style.left = '50%';
-    treat.style.bottom = '0';
-    treat.style.zIndex = treatCount;
-    treatsInside.appendChild(treat);
   });
+}
+
+// Dog CEO API widget logic
+let breedList = [];
+
+async function getBreeds() {
+  const res = await fetch('https://dog.ceo/api/breeds/list/all');
+  const data = await res.json();
+  breedList = Object.keys(data.message);
+}
+
+async function showRandomBreed() {
+  if (breedList.length === 0) await getBreeds();
+  const breed = breedList[Math.floor(Math.random() * breedList.length)];
+  document.getElementById('breed-name').innerText = breed.charAt(0).toUpperCase() + breed.slice(1);
+  // get image
+  const imgRes = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`);
+  const imgData = await imgRes.json();
+  const img = document.getElementById('dog-img');
+  img.src = imgData.message;
+  img.style.display = '';
+}
+
+const refreshBtn = document.getElementById('refresh-btn');
+if (refreshBtn) {
+  refreshBtn.onclick = showRandomBreed;
+  // Initial load
+  showRandomBreed();
+}
 </script>
 </html>
