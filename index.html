@@ -8,13 +8,105 @@
 </head>
 <body>
   <main class="hero">
-    <div class="card">
-      <!-- Image: replace images/me.jpg with your real photo (same filename) -->
-      <img class="profile-image" src="images/me.jpg" alt="Your photo" onerror="this.onerror=null;this.src='images/placeholder.svg'">
-      <h1>Hello world</h1>
-      <p class="lead">Welcome to my site.</p>
-      <button class="contact-btn" type="button">Contact me</button>
+    <div class="card card-centered">
+      <img class="profile-image" src="images/picturechunkyandme.png" alt="Your photo" onerror="this.onerror=null;this.src='images/placeholder.svg'">
+      <h1>You're in Chunky's world</h1>
+  <!-- Contact button removed -->
+    </div>
+    <div class="sections-below">
+      <div class="split-section">
+        <div class="split-left">
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/baby-chunk.jpg" alt="Baby Chunk">
+            <div class="gallery-caption">Baby Chunk is adorable,<br>see my gallery</div>
+          </div>
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/jasper.jpg" alt="Jasper">
+            <div class="gallery-caption">Meet my brother Jasper</div>
+          </div>
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/chunk-hour.jpg" alt="Chunk Hour">
+            <div class="gallery-caption">Follow me on instagram</div>
+          </div>
+        </div>
+        <div class="split-right">
+          <div class="treat-section">
+            <button class="treat-btn" type="button" id="treat-btn">Give me a treat</button>
+            <div class="treat-jar-container" style="position:relative;display:inline-block;width:120px;height:220px;">
+              <div id="treats-stack" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;pointer-events:none;"></div>
+              <img class="treat-img" src="images/jar.svg" alt="Treat Jar" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </body>
+<script>
+const treatBtn = document.getElementById('treat-btn');
+const treatsStack = document.getElementById('treats-stack');
+let treatCount = 0;
+const maxTreats = 20;
+
+if (treatBtn && treatsStack) {
+  // Jar dimensions
+  const jarHeight = 220; // px
+  const jarWidth = 120; // px
+  const treatHeight = 26; // px (smaller for better fit)
+  const treatWidth = 30; // px (smaller for better fit)
+  const visibleTreatWidth = 32; // px (more separation between treats)
+  const bottomPadding = 8; // px
+  const topPadding = 8; // px
+  const usableHeight = jarHeight - bottomPadding - topPadding;
+  const usableWidth = jarWidth - 20; // 10px margin each side
+  const treatsPerRow = Math.floor(usableWidth / visibleTreatWidth);
+  const numRows = Math.floor(usableHeight / treatHeight);
+  const maxTreatsInJar = treatsPerRow * numRows;
+
+  // Define per-row x-ranges to approximate jar silhouette
+  const rowXRanges = [];
+  for (let r = 0; r < numRows; r++) {
+    // Wider at bottom, narrower at top (neck)
+    // You can fine-tune these values for your jar.svg
+  const baseMin = 2, baseMax = jarWidth - 2 - visibleTreatWidth;
+  const neckMin = 12, neckMax = jarWidth - 12 - visibleTreatWidth;
+    // Interpolate between base and neck
+    const t = r / (numRows - 1);
+    const minX = Math.round(baseMin * (1 - t) + neckMin * t);
+    const maxX = Math.round(baseMax * (1 - t) + neckMax * t);
+    rowXRanges.push({ minX, maxX });
+  }
+
+  treatBtn.addEventListener('click', () => {
+    if (treatCount >= maxTreatsInJar) return;
+    // Determine row and column
+    const row = Math.floor(treatCount / treatsPerRow);
+    const col = treatCount % treatsPerRow;
+    // Calculate position: fixed horizontal positions in the row
+    const { minX, maxX } = rowXRanges[row];
+    const colCount = Math.floor((maxX - minX) / visibleTreatWidth) + 1;
+    const colIdx = Math.min(colCount - 1, col);
+    const x = minX + colIdx * visibleTreatWidth;
+    const y = jarHeight - bottomPadding - treatHeight * (row + 1);
+    // Add small random offset for natural look
+    const xOffset = Math.floor(Math.random() * 4 - 2);
+    const yOffset = Math.floor(Math.random() * 4 - 2);
+    // Random rotation
+    const rot = Math.floor(Math.random() * 60 - 30);
+    const treatImg = document.createElement('img');
+    treatImg.src = 'images/dog-treat.png';
+    treatImg.alt = 'Dog Treat';
+    treatImg.style.position = 'absolute';
+    treatImg.style.left = (x + xOffset) + 'px';
+    treatImg.style.top = (y + yOffset) + 'px';
+    treatImg.style.transform = `rotate(${rot}deg)`;
+    treatImg.style.width = treatWidth + 'px';
+    treatImg.style.height = treatHeight + 'px';
+    treatImg.style.zIndex = row;
+    treatImg.style.pointerEvents = 'none';
+    treatsStack.appendChild(treatImg);
+    treatCount++;
+  });
+}
+</script>
 </html>
