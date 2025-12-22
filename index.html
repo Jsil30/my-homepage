@@ -1,3 +1,31 @@
+</body>
+<script>
+  // Dog CEO API widget logic
+  let breedList = [];
+
+  async function getBreeds() {
+    const res = await fetch('https://dog.ceo/api/breeds/list/all');
+    const data = await res.json();
+    breedList = Object.keys(data.message);
+  }
+
+  async function showRandomBreed() {
+    if (breedList.length === 0) await getBreeds();
+    const breed = breedList[Math.floor(Math.random() * breedList.length)];
+    document.getElementById('breed-name').innerText = breed.charAt(0).toUpperCase() + breed.slice(1);
+    // get image
+    const imgRes = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`);
+    const imgData = await imgRes.json();
+    const img = document.getElementById('dog-img');
+    img.src = imgData.message;
+    img.style.display = '';
+  }
+
+  document.getElementById('refresh-btn').onclick = showRandomBreed;
+
+  // Initial load
+  showRandomBreed();
+</script>
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,13 +36,67 @@
 </head>
 <body>
   <main class="hero">
-    <div class="card">
-      <!-- Image: replace images/me.jpg with your real photo (same filename) -->
-      <img class="profile-image" src="images/me.jpg" alt="Your photo" onerror="this.onerror=null;this.src='images/placeholder.svg'">
-      <h1>Hello world</h1>
-      <p class="lead">Welcome to my site.</p>
-      <button class="contact-btn" type="button">Contact me</button>
+    <div class="card card-centered">
+      <img class="profile-image" src="images/picturechunkyandme.png" alt="Your photo" onerror="this.onerror=null;this.src='images/placeholder.svg'">
+      <h1>You're in Chunky's world</h1>
+  <!-- Contact button removed -->
+    </div>
+    <div id="dog-widget">
+      <div id="breed-name">Loading...</div>
+      <img id="dog-img" src="" alt="Dog image" style="display:none;">
+      <button id="refresh-btn">Show Another Breed</button>
+    </div>
+    <div class="sections-below">
+      <div class="split-section">
+        <div class="split-left">
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/baby-chunk.jpg" alt="Baby Chunk">
+            <div class="gallery-caption">Baby Chunk is adorable,<br>see my gallery</div>
+          </div>
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/jasper.jpg" alt="Jasper">
+            <div class="gallery-caption">Meet my brother Jasper</div>
+          </div>
+          <div class="gallery-item">
+            <img class="gallery-img" src="images/chunk-hour.jpg" alt="Chunk Hour">
+            <div class="gallery-caption">Follow me on instagram</div>
+          </div>
+        </div>
+        <div class="split-right">
+          <div class="treat-section">
+            <button class="treat-btn" type="button" id="give-treat-btn">Give me a treat</button>
+            <div class="jar-container">
+              <img class="treat-img" src="images/jar.svg" alt="Treat Jar">
+              <div id="treats-inside"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </body>
+<script>
+  const btn = document.getElementById('give-treat-btn');
+  const treatsInside = document.getElementById('treats-inside');
+  let treatCount = 0;
+  btn.addEventListener('click', () => {
+    treatCount++;
+    const treat = document.createElement('img');
+    treat.src = 'images/dog-treat.png';
+    treat.alt = 'Dog Treat';
+    treat.className = 'dog-treat';
+    // Random rotation between -30 and 30 degrees
+    const rot = Math.random() * 60 - 30;
+    // Each treat is stacked a bit higher
+    const baseY = 60; // px from bottom
+    const stepY = 22; // px per treat
+    const y = baseY - (treatCount - 1) * stepY;
+    treat.style.transform = `translate(-50%, ${y}px) rotate(${rot}deg)`;
+    treat.style.position = 'absolute';
+    treat.style.left = '50%';
+    treat.style.bottom = '0';
+    treat.style.zIndex = treatCount;
+    treatsInside.appendChild(treat);
+  });
+</script>
 </html>
