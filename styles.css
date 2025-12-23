@@ -13,27 +13,70 @@
   margin-top: 0.2rem;
   transition: transform .12s ease, box-shadow .12s ease;
 }
-.treat-btn:active {
-  transform: translateY(1px);
-}
-.treat-btn:focus {
-  outline: 3px solid rgba(255,255,255,0.14);
-}
-.treat-section {
+
+/* Dog CEO API Widget Styles (fixed, outside media queries) */
+#dog-widget {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid #ccc;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  background: rgba(255,255,255,0.92);
+  color: #222;
+  box-shadow: 0 2px 12px 0 rgba(60,30,120,0.10);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
-  margin-top: 0.2rem;
-  height: 100%;
   justify-content: flex-start;
+  box-sizing: border-box;
+  height: 220px;
+  max-width: 100%;
 }
-.treat-caption {
-  font-size: 1.18rem;
+.dog-widget-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+#refresh-btn.treat-btn {
+  margin-top: 0;
+  margin-bottom: 0;
+  height: 44px;
+  align-self: flex-start;
+}
+#dog-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px 0 rgba(60,30,120,0.10);
+}
+#refresh-btn {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: #3399ff;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
-  margin-bottom: 0.3rem;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  transition: background 0.2s;
+}
+#refresh-btn:hover {
+  background: #0077cc;
+}
+#breed-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 6px;
 }
 .treat-img {
   width: auto;
@@ -195,4 +238,53 @@ h1{
   .profile-image{width:120px;height:120px}
   .card{padding:1.5rem}
   .gallery-img{width:54px;height:54px}
+
+}
+
+/* Dog CEO API Widget Styles (fixed, outside media queries) */
+#dog-widget {
+  width: 120px;
+  height: 220px;
+  border: 1px solid #ccc;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  margin: 18px 0 0 0;
+  background: rgba(255,255,255,0.92);
+  color: #222;
+  box-shadow: 0 2px 12px 0 rgba(60,30,120,0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+#dog-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px 0 rgba(60,30,120,0.10);
+}
+#refresh-btn {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: #3399ff;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+#refresh-btn:hover {
+  background: #0077cc;
+}
+#breed-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 6px;
 }

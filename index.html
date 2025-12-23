@@ -30,14 +30,22 @@
           </div>
         </div>
         <div class="split-right">
-          <div class="treat-section">
-            <button class="treat-btn" type="button" id="treat-btn">Give me a treat</button>
-            <div class="treat-jar-container" style="position:relative;display:inline-block;width:120px;height:220px;">
-              <div id="treats-stack" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;pointer-events:none;"></div>
-              <img class="treat-img" src="images/jar.svg" alt="Treat Jar" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;">
+            <div class="treat-section">
+              <button class="treat-btn" type="button" id="treat-btn">Give me a treat</button>
+              <div class="treat-jar-container" style="position:relative;display:inline-block;width:120px;height:220px;">
+                <div id="treats-stack" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;pointer-events:none;"></div>
+                <img class="treat-img" src="images/jar.svg" alt="Treat Jar" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;">
+              </div>
             </div>
-          </div>
         </div>
+      </div>
+      <div class="dog-widget-row">
+        <button class="treat-btn" id="refresh-btn">Show Another Breed</button>
+        <div id="dog-widget">
+          <div id="breed-name">Loading...</div>
+          <img id="dog-img" src="" alt="Dog image" style="display:none;">
+        </div>
+      </div>
       </div>
     </div>
   </main>
@@ -46,7 +54,6 @@
 const treatBtn = document.getElementById('treat-btn');
 const treatsStack = document.getElementById('treats-stack');
 let treatCount = 0;
-const maxTreats = 20;
 
 if (treatBtn && treatsStack) {
   // Jar dimensions
@@ -57,19 +64,25 @@ if (treatBtn && treatsStack) {
   const visibleTreatWidth = 32; // px (more separation between treats)
   const bottomPadding = 8; // px
   const topPadding = 8; // px
+  const HORIZONTAL_MARGIN = 10; // px margin on each side
   const usableHeight = jarHeight - bottomPadding - topPadding;
-  const usableWidth = jarWidth - 20; // 10px margin each side
+  const usableWidth = jarWidth - (2 * HORIZONTAL_MARGIN); // 10px margin each side
   const treatsPerRow = Math.floor(usableWidth / visibleTreatWidth);
   const numRows = Math.floor(usableHeight / treatHeight);
   const maxTreatsInJar = treatsPerRow * numRows;
+  // Define horizontal padding constants for jar silhouette
+  const BASE_HORIZONTAL_PADDING = 2;
+  const NECK_HORIZONTAL_PADDING = 12;
 
   // Define per-row x-ranges to approximate jar silhouette
   const rowXRanges = [];
+  // Maximum treat rotation in degrees
+  const MAX_ROTATION_DEGREES = 30;
   for (let r = 0; r < numRows; r++) {
     // Wider at bottom, narrower at top (neck)
     // You can fine-tune these values for your jar.svg
-  const baseMin = 2, baseMax = jarWidth - 2 - visibleTreatWidth;
-  const neckMin = 12, neckMax = jarWidth - 12 - visibleTreatWidth;
+    const baseMin = BASE_HORIZONTAL_PADDING, baseMax = jarWidth - BASE_HORIZONTAL_PADDING - visibleTreatWidth;
+    const neckMin = NECK_HORIZONTAL_PADDING, neckMax = jarWidth - NECK_HORIZONTAL_PADDING - visibleTreatWidth;
     // Interpolate between base and neck
     const t = r / (numRows - 1);
     const minX = Math.round(baseMin * (1 - t) + neckMin * t);
@@ -89,12 +102,14 @@ if (treatBtn && treatsStack) {
     const x = minX + colIdx * visibleTreatWidth;
     const y = jarHeight - bottomPadding - treatHeight * (row + 1);
     // Add small random offset for natural look
-    const xOffset = Math.floor(Math.random() * 4 - 2);
+    const RANDOM_OFFSET_RANGE = 4;
+    const RANDOM_OFFSET_CENTER = 2;
+    const xOffset = Math.floor(Math.random() * RANDOM_OFFSET_RANGE - RANDOM_OFFSET_CENTER);
     const yOffset = Math.floor(Math.random() * 4 - 2);
     // Random rotation
-    const rot = Math.floor(Math.random() * 60 - 30);
-    const treatImg = document.createElement('img');
-    treatImg.src = 'images/dog-treat.png';
+    const rot = Math.floor(Math.random() * (2 * MAX_ROTATION_DEGREES + 1) - MAX_ROTATION_DEGREES);
+  const treatImg = document.createElement('img');
+  treatImg.src = 'images/dog-treat.png';
     treatImg.alt = 'Dog Treat';
     treatImg.style.position = 'absolute';
     treatImg.style.left = (x + xOffset) + 'px';
@@ -108,5 +123,35 @@ if (treatBtn && treatsStack) {
     treatCount++;
   });
 }
+  </script>
+
+  <!-- Dog CEO API Widget Script -->
+  <script>
+  let breedList = [];
+
+  async function getBreeds() {
+    const res = await fetch('https://dog.ceo/api/breeds/list/all');
+    const data = await res.json();
+    breedList = Object.keys(data.message);
+  }
+
+  async function showRandomBreed() {
+    if (breedList.length === 0) await getBreeds();
+    const breed = breedList[Math.floor(Math.random() * breedList.length)];
+    document.getElementById('breed-name').innerText = breed.charAt(0).toUpperCase() + breed.slice(1);
+    // get image
+    const imgRes = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`);
+    const imgData = await imgRes.json();
+    const img = document.getElementById('dog-img');
+    img.src = imgData.message;
+    img.style.display = '';
+  }
+
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (refreshBtn) {
+    refreshBtn.onclick = showRandomBreed;
+    // Initial load
+    showRandomBreed();
+  }
 </script>
 </html>
