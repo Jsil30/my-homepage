@@ -120,5 +120,35 @@ if (treatBtn && treatsStack) {
     treatCount++;
   });
 }
+
+// Dog CEO API widget logic
+(function() {
+  const breedName = document.getElementById('breed-name');
+  const dogImg = document.getElementById('dog-img');
+  const refreshBtn = document.getElementById('refresh-btn');
+  let breedList = [];
+
+  async function getBreeds() {
+    const res = await fetch('https://dog.ceo/api/breeds/list/all');
+    const data = await res.json();
+    breedList = Object.keys(data.message);
+  }
+
+  async function showRandomBreed() {
+    if (breedList.length === 0) await getBreeds();
+    const breed = breedList[Math.floor(Math.random() * breedList.length)];
+    breedName.innerText = breed.charAt(0).toUpperCase() + breed.slice(1);
+    // get image
+    const imgRes = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`);
+    const imgData = await imgRes.json();
+    dogImg.src = imgData.message;
+    dogImg.style.display = '';
+  }
+
+  if (refreshBtn) {
+    refreshBtn.onclick = showRandomBreed;
+    showRandomBreed();
+  }
+})();
 </script>
 </html>
